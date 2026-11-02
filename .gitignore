@@ -1,0 +1,36 @@
+# Ambientes virtuais Python
+venv/
+.venv/
+venv312/
+venv-conversao/
+
+# Arquivos temporários Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Dependências e compilação React
+node_modules/
+dist/
+.vite/
+
+# Modelos originais de IA
+*.h5
+*.joblib
+
+# Configurações privadas
+.env
+.env.*
+!.env.example
+
+# Arquivos temporários
+*.log
+erro-conversao.txt
+
+# Backup do Git antigo
+.git-backup/
+
+# Sistema e editor
+.DS_Store
+Thumbs.db
+.vscode/
