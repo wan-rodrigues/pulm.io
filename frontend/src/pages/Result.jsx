@@ -83,10 +83,11 @@ export default function Results() {
 
   const imageProvided = currentResult.imageProvided === true;
 
-  // Só considera uma integração como concluída quando
-  // o backend informar explicitamente esse status.
+
   const integrationReady =
-    currentResult.status === "completed";
+    Array.isArray(currentResult.modelOutput?.probabilities) ||
+    Number.isFinite(currentResult.imageAnalysis);
+
 
   const probabilities = currentResult.modelOutput?.probabilities;
 const classes = currentResult.modelOutput?.classes;
@@ -95,13 +96,17 @@ const classOneIndex = Array.isArray(classes)
   ? classes.indexOf(1)
   : -1;
 
-const classOneScore =
-  currentResult.type === "symptoms" &&
-  integrationReady &&
-  Array.isArray(probabilities) &&
-  classOneIndex >= 0 &&
-  Number.isFinite(probabilities[classOneIndex])
-    ? probabilities[classOneIndex]
+
+  const classOneScore =
+    Array.isArray(probabilities) &&
+    classOneIndex >= 0 &&
+    Number.isFinite(probabilities[classOneIndex])
+      ? probabilities[classOneIndex]
+      : null;
+
+
+  const cnnScore = Number.isFinite(currentResult.imageAnalysis)
+    ? currentResult.imageAnalysis
     : null;
 
   const formattedDate = currentResult.timestamp
@@ -208,7 +213,7 @@ const classOneScore =
               </div>
             </div>
 
-            
+
           {/* PONTUAÇÃO EXPERIMENTAL EM DESTAQUE */}
           {classOneScore !== null && (
             <div className="rounded-2xl border-2 border-[#BFE9D0] bg-[#F0FCF5] p-6 md:p-8">
@@ -258,6 +263,55 @@ const classOneScore =
           )}
 
 
+          {/* RESULTADO EXPERIMENTAL DA RADIOGRAFIA */}
+          {cnnScore !== null && cnnScore >= 0 && cnnScore <= 1 && (
+            <div className="rounded-2xl border-2 border-[#BEE6F5] bg-[#EFFAFF] p-6 md:p-8">
+              <div className="mb-4 flex items-center gap-3">
+                <ScanLine size={28} className="text-[#1689C7]" />
+
+                <h2 className="text-xl font-extrabold text-[#173D32]">
+                  Resultado da análise da radiografia
+                </h2>
+              </div>
+
+              <p className="text-sm text-[#476B5D]">
+                Pontuação produzida pela CNN experimental
+              </p>
+
+              <p className="my-4 text-5xl font-extrabold text-[#1689C7]">
+                {(cnnScore * 100).toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}%
+              </p>
+
+              <div className="h-4 overflow-hidden rounded-full bg-[#D6EBF5]">
+                <div
+                  className="h-full rounded-full bg-[#1689C7]"
+                  style={{ width: `${cnnScore * 100}%` }}
+                />
+              </div>
+
+              <p className="mt-4 text-sm font-semibold text-[#315F75]">
+                Pontuação experimental da saída da CNN
+              </p>
+
+              <p className="mt-3 text-sm leading-relaxed text-[#476B5D]">
+                Este percentual representa a saída numérica do modelo
+                experimental de análise de radiografias, apresentada em
+                uma escala de 0 a 100%.
+              </p>
+
+              <p className="mt-3 text-sm leading-relaxed text-[#476B5D]">
+                Esta pontuação não representa a probabilidade clínica de
+                tuberculose, não confirma nem descarta a doença e não
+                substitui a avaliação de profissionais de saúde.
+              </p>
+            </div>
+          )}
+
+
+
             {/* RESUMO DOS DADOS */}
             <div className="grid gap-4 md:grid-cols-2">
               {/* Sintomas */}
@@ -304,11 +358,15 @@ const classOneScore =
                     : "Etapa não realizada"}
                 </p>
 
-                <p className="mt-2 text-sm text-[#698478]">
-                  {imageProvided
-                    ? "Arquivo selecionado para futura integração com a CNN."
-                    : "Você continuou sem enviar uma imagem."}
-                </p>
+
+                  <p className="mt-2 text-sm text-[#698478]">
+                    {imageProvided
+                      ? Number.isFinite(currentResult.imageAnalysis)
+                        ? "Radiografia processada pela CNN experimental."
+                        : "Imagem enviada, mas sem resultado disponível."
+                      : "Você continuou sem enviar uma imagem."}
+                  </p>
+
               </div>
             </div>
 
@@ -454,7 +512,7 @@ const classOneScore =
                         Modelo de análise dos 13 sintomas.
                       </p>
 
-                      
+
                     <div className="mt-3 space-y-2">
                       {currentResult.type === "symptoms" &&
                       Array.isArray(currentResult.modelOutput?.probabilities) ? (
@@ -491,25 +549,52 @@ const classOneScore =
                         Modelo de análise de radiografias.
                       </p>
 
-                      {imageProvided ? (
-                        <TechnicalValue
-                          value={currentResult.imageAnalysis?.cnn}
-                          pending={!integrationReady}
-                        />
-                      ) : (
-                        <span className="text-sm font-semibold text-[#698478]">
-                          Imagem não enviada
-                        </span>
-                      )}
+
+
+                  {imageProvided ? (
+                    cnnScore !== null ? (
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm font-semibold text-[#315F75]">
+                            Saída bruta da CNN
+                          </span>
+
+                          <span className="font-extrabold text-[#1689C7]">
+                            {cnnScore.toLocaleString("pt-BR", {
+                              maximumFractionDigits: 6,
+                            })}
+                          </span>
+                        </div>
+
+                        <p className="text-xs leading-relaxed text-[#698478]">
+                          Valor numérico produzido pela camada de saída do modelo.
+                          O significado clínico dessa pontuação ainda não foi validado.
+                        </p>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-[#698478]">
+                        Saída do modelo indisponível
+                      </span>
+                    )
+                  ) : (
+                    <span className="text-sm font-semibold text-[#698478]">
+                      Imagem não enviada
+                    </span>
+                  )}
+
+
                     </div>
                   </div>
 
-                  <p className="text-xs leading-relaxed text-[#698478]">
-                    Os valores técnicos futuros serão exibidos
-                    em sua escala original. Eles não devem ser
-                    interpretados automaticamente como
-                    probabilidades clínicas.
-                  </p>
+
+                <p className="text-xs leading-relaxed text-[#698478]">
+                  Os valores apresentados são saídas técnicas dos modelos
+                  experimentais Random Forest e CNN, executados diretamente
+                  no navegador. Essas pontuações não representam
+                  probabilidades clínicas validadas e não devem ser
+                  utilizadas para confirmar ou descartar tuberculose.
+                </p>
+
                 </div>
               )}
             </div>

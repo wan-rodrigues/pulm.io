@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "@/context/AppContext";
 import JourneyProgress from "@/components/JourneyProgress";
+import { analisarRadiografia } from "@/lib/cnnModel";
 import {
   ArrowLeft,
   ArrowRight,
@@ -24,10 +25,13 @@ export default function UploadPage() {
 
   const {
     screeningData,
+    currentResult,
     setUploadedImage,
     setCurrentResult,
     addToHistory,
   } = useApp();
+
+
 
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -95,7 +99,8 @@ export default function UploadPage() {
     handleFile(event.dataTransfer.files?.[0]);
   };
 
-  const handleContinue = (skipImage = false) => {
+
+  const handleContinue = async (skipImage = false) => {
     if (isAnalyzing) return;
 
     if (!skipImage && !file) {
@@ -113,29 +118,41 @@ export default function UploadPage() {
         setUploadedImage(null);
       }
 
-      // Integração futura:
-      // Random Forest recebe screeningData.
-      // CNN recebe selectedImage, quando disponível.
-      // Nenhum modelo é executado nesta versão.
+      let imageAnalysis = null;
+
+      if (selectedImage) {
+        imageAnalysis = await analisarRadiografia(selectedImage);
+        console.log("Resultado experimental da CNN:", imageAnalysis);
+      }
+
 
       const result = {
+        ...currentResult,
+
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),
         screeningData: { ...screeningData },
+
         imageProvided: Boolean(selectedImage),
         imageName: selectedImage?.name ?? null,
-        screeningScore: null,
-        imageAnalysis: null,
+
+        modelOutput: currentResult?.modelOutput ?? null,
+        imageAnalysis,
+
         finalScore: null,
-        status: "pending_integration",
+        status: "experimental",
       };
+
 
       setCurrentResult(result);
       addToHistory(result);
 
       navigate("/result");
     } catch (err) {
-      setError(err.message || "Não foi possível continuar.");
+      console.error("Erro na análise da radiografia:", err);
+      setError(
+        err.message || "Não foi possível analisar a imagem. Tente novamente."
+      );
     } finally {
       setIsAnalyzing(false);
     }
@@ -184,9 +201,7 @@ export default function UploadPage() {
               </h1>
 
               <p className="mt-3 max-w-xl leading-relaxed text-white/90">
-                Selecione uma radiografia de tórax.
-                Esta etapa é opcional e a análise por IA ainda
-                será integrada.
+                A radiografia será processada por um modelo experimental de inteligência artificial (CNN). A saída produzida tem finalidade exclusivamente acadêmica e não constitui diagnóstico de tuberculose.
               </p>
             </div>
           </section>

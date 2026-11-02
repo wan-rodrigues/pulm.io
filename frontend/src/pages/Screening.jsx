@@ -233,7 +233,7 @@ console.log("Probabilidades:", resultado.probabilidades);
       },
     });
 
-    navigate("/result");
+    navigate("/upload");
   } catch (error) {
     console.error("Erro na análise de sintomas:", error);
     alert("Não foi possível executar a análise. Tente novamente.");
