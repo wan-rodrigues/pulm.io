@@ -21,21 +21,18 @@ import {
 } from "lucide-react";
 
 
+
 const SYMPTOM_LABELS = {
-  fever: "Febre por duas semanas",
-  coughWithBlood: "Tosse com sangue",
-  bloodySputum: "Catarro com sangue",
+  fever: "Febre",
+  persistentCough: "Tosse persistente",
   nightSweats: "Suores noturnos",
-  chestPain: "Dor no peito",
-  backPain: "Dor em determinadas regiões das costas",
-  shortnessOfBreath: "Falta de ar",
   weightLoss: "Perda de peso",
-  fatigue: "Sensação de cansaço",
-  neckArmpitLumps: "Caroços nas axilas e no pescoço",
-  persistentCough: "Tosse com catarro por 2 a 4 semanas",
-  swollenLymphNodes: "Linfonodos inchados",
+  coughWithBlood: "Tosse ou catarro com sangue",
+  chestPain: "Dor no peito",
+  fatigue: "Cansaço",
   lossOfAppetite: "Perda de apetite",
 };
+
 
 
 function TechnicalValue({ value, pending }) {
@@ -243,23 +240,28 @@ const classOneIndex = Array.isArray(classes)
                 />
               </div>
 
-              <p className="mt-4 text-sm font-semibold text-[#38594E]">
-                Pontuação experimental associada à classe 1
-              </p>
 
-              <p className="mt-3 text-sm leading-relaxed text-[#476B5D]">
-                O modelo identificou padrões de sintomas associados à classe 1,
-                considerada uma possível representação de tuberculose no
-                conjunto de treinamento.
-              </p>
+            <h3 className="mt-5 text-base font-bold text-[#173D32]">
+              O que significa esse resultado?
+            </h3>
 
-              <p className="mt-3 text-sm leading-relaxed text-[#476B5D]">
-                Este percentual não representa a probabilidade real de você
-                ter tuberculose e não confirma nem descarta a doença.
-                A investigação deve ser realizada por profissionais de saúde,
-                com os exames apropriados.
+            <p className="mt-3 text-sm leading-relaxed text-[#476B5D]">
+              Esta porcentagem representa a estimativa feita pela inteligência
+              artificial a partir dos sintomas que você informou, considerando
+              os padrões aprendidos durante seu treinamento.
+            </p>
+
+            <div className="mt-4 rounded-xl bg-[#EAF7EF] p-4">
+              <p className="text-sm leading-relaxed text-[#38594E]">
+                <strong>Atenção:</strong> esse resultado é experimental e não
+                representa a probabilidade real de você ter tuberculose.
+                Somente uma avaliação médica e exames adequados podem
+                confirmar ou descartar a doença.
               </p>
             </div>
+
+            </div>
+
           )}
 
 
@@ -292,21 +294,26 @@ const classOneIndex = Array.isArray(classes)
                 />
               </div>
 
-              <p className="mt-4 text-sm font-semibold text-[#315F75]">
-                Pontuação experimental da saída da CNN
-              </p>
+
+              <h3 className="mt-5 text-base font-bold text-[#173D32]">
+                O que significa esse resultado?
+              </h3>
 
               <p className="mt-3 text-sm leading-relaxed text-[#476B5D]">
-                Este percentual representa a saída numérica do modelo
-                experimental de análise de radiografias, apresentada em
-                uma escala de 0 a 100%.
+                Esta porcentagem representa a estimativa feita pela inteligência
+                artificial ao analisar sua radiografia e comparar suas
+                características com os padrões aprendidos durante o treinamento.
               </p>
 
-              <p className="mt-3 text-sm leading-relaxed text-[#476B5D]">
-                Esta pontuação não representa a probabilidade clínica de
-                tuberculose, não confirma nem descarta a doença e não
-                substitui a avaliação de profissionais de saúde.
-              </p>
+              <div className="mt-4 rounded-xl bg-[#E1F3FC] p-4">
+                <p className="text-sm leading-relaxed text-[#315F75]">
+                  <strong>Atenção:</strong> esse resultado é experimental e não
+                  representa a probabilidade real de você ter tuberculose.
+                  A interpretação da radiografia deve ser realizada por
+                  profissionais de saúde.
+                </p>
+              </div>
+
             </div>
           )}
 
@@ -330,7 +337,7 @@ const classOneIndex = Array.isArray(classes)
                 <p className="mt-3 text-4xl font-extrabold text-[#087E66]">
                   {selectedSymptoms.length}
                   <span className="ml-2 text-base font-medium text-[#698478]">
-                    de 13
+                    de 8
                   </span>
                 </p>
 
@@ -485,7 +492,7 @@ const classOneIndex = Array.isArray(classes)
                 )}
               </button>
 
-              {showDetails && (
+              {showDetails ? (
                 <div className="space-y-4 border-t border-[#DDECE3] p-5">
                   <div className="flex items-start gap-2 text-sm text-[#698478]">
                     <Info
@@ -509,7 +516,7 @@ const classOneIndex = Array.isArray(classes)
                       </h4>
 
                       <p className="mb-4 mt-2 text-sm text-[#38594E]">
-                        Modelo de análise dos 13 sintomas.
+                        Modelo de análise dos 8 sintomas.
                       </p>
 
 
@@ -596,7 +603,7 @@ const classOneIndex = Array.isArray(classes)
                 </p>
 
                 </div>
-              )}
+              ) : null}
             </div>
           </section>
 
